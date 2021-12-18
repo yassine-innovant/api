@@ -8,6 +8,5 @@ const { register } = require("../controllers/auth");
 
 //routes
 router.post("/register", register);
-router.get("/", () => "hello world");
 
 module.exports = router;

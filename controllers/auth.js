@@ -1,11 +1,12 @@
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const { checkUserExists } = require("../services/auth");
 
 exports.register = async (req, res) => {
   const { first_name, last_name, email, password } = req.body;
   try {
-    let user = await User.findOne({ email });
+    user = await checkUserExists(email);
     if (user) {
       res.status(400).json({ error: "User already exists" });
     }
