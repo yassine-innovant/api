@@ -13,8 +13,32 @@ exports.register = async (req, res) => {
     const crypted_password = await bcrypt.hash(password, 10);
     user = new User({ first_name, last_name, email, crypted_password });
     await user.save();
-    return res.status(201).json({ message: "User created successfully", user });
+    return res.status(201).json({ message: "User created successfully" });
   } catch (err) {
     console.log("Error when registering: " + err);
+  }
+};
+
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await checkUserExists(email);
+    console.log("the user OBJECT:" + user);
+    if (!user) {
+      return res.status(400).json({ error: "Invalid Credentials" });
+    }
+    console.log("the password is: " + password);
+    console.log("the user password: " + user.crypted_password);
+    const passwordMatch = await bcrypt.compare(password, user.crypted_password);
+    if (!passwordMatch) {
+      return res.status(400).json({ error: "Invalid Credentials" });
+    }
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    return res.json({ token });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ error: err.message });
   }
 };
